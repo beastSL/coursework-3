@@ -1,6 +1,5 @@
 import numpy as np
 from models.dynamic_regression import DynamicRegression
-from models.gradient_descent import LineSearchTool
 
 def test_predict():
     """

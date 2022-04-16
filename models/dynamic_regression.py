@@ -1,9 +1,7 @@
-from lib2to3.pytree import Base
-from typing import Dict, Iterable, List, Union
+from typing import Dict, List, Union
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 import pandas as pd
-from dataclasses import dataclass
 from models.gradient_descent import GradientDescentOptimizer
 from models.oracle import DynamicRegressionOracle
 

@@ -1,4 +1,3 @@
-from sklearn.base import BaseEstimator, TransformerMixin
 from sktime.forecasting.ets import AutoETS
 from sktime.forecasting.arima import AutoARIMA
 from sktime.forecasting.trend import TrendForecaster
