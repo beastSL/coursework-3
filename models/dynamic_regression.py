@@ -118,5 +118,3 @@ class DynamicRegression(BaseEstimator, TransformerMixin):
             return y
         else:
             raise TypeError("Only objects of type list, pandas.Series and numpy.ndarray are valid.")
-
-        
