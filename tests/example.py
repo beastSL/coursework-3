@@ -6,25 +6,27 @@ from models.dynamic_regression import DynamicRegression
 from models.models import SktimeETS, SktimeARIMA, SktimeLinearRegression
 from sklearn.metrics import mean_squared_error
 import plotly.graph_objects as go
+import warnings
+warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
     dataset = pd.read_csv("/Users/beast-sl/source/repos/coursework-3/Dataset/Train/Monthly-train.csv")
     testing_series = dataset[dataset["V1"] == "M100"].squeeze().dropna().drop(index='V1')
     testing_series.index = range(len(testing_series))
-    testing_series = testing_series.astype(np.float)
+    testing_series = testing_series.astype(np.float).to_numpy()
     train, test = temporal_train_test_split(testing_series, test_size=5)
 
-    # print("Testing Dynamic Regression")
-    # model = DynamicRegression(fh=np.arange(1, 6))
-    # status, history = model.fit(train, trace=True)
-    # print(f"Status {status}, history:")
-    # pprint(history)
-    # dynamic_regression_predicts = model.predict(train)
-    # print(f"MSE: {mean_squared_error(dynamic_regression_predicts, test)}")
+    print("Testing Dynamic Regression")
+    model = DynamicRegression(fh=np.arange(1, 6))
+    status, history = model.fit(train, trace=True, display=True)
+    print(f"Status {status}, history:{history}")
+    pprint(history)
+    dynamic_regression_predicts = model.predict(train)
+    print(f"MSE: {mean_squared_error(dynamic_regression_predicts, test)}")
 
     print("Testing seasonal Dynamic Regression")
     model = DynamicRegression(fh=np.arange(1, 6), sp=12)
-    status, history = model.fit(train, trace=True)
+    status, history = model.fit(train, trace=True, display=True)
     print(f"Status {status}, history:")
     pprint(history)
     seasonal_dynamic_regression_predicts = model.predict(train)
@@ -49,10 +51,20 @@ if __name__ == '__main__':
     print(f"MSE: {mean_squared_error(linear_regression_predicts, test)}")
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(y=test, name="Test"))
-    # fig.add_trace(go.Scatter(y=dynamic_regression_predicts, name="Dynamic regression"))
-    fig.add_trace(go.Scatter(y=seasonal_dynamic_regression_predicts, name="Dynamic regression"))
-    fig.add_trace(go.Scatter(y=ets_predicts, name="ETS"))
-    fig.add_trace(go.Scatter(y=arima_predicts, name="ARIMA"))
-    fig.add_trace(go.Scatter(y=linear_regression_predicts, name="Linear regression"))
+    fig.add_trace(go.Scatter(x=np.arange(len(train) + len(test)), y=np.append(train, test), name="Test"))
+    fig.add_trace(go.Scatter(x=np.arange(len(train) - 1, len(train) + len(test)),
+                             y=np.append([train[len(train) - 1]], dynamic_regression_predicts),
+                             name="Dynamic regression"))
+    fig.add_trace(go.Scatter(x=np.arange(len(train) - 1, len(train) + len(test)),
+                             y=np.append([train[len(train) - 1]], seasonal_dynamic_regression_predicts),
+                            name="Seasonal dynamic regression"))
+    fig.add_trace(go.Scatter(x = np.arange(len(train) - 1, len(train) + len(test)),
+                             y=np.append([train[len(train) - 1]], ets_predicts),
+                             name="ETS"))
+    fig.add_trace(go.Scatter(x=np.arange(len(train) - 1, len(train) + len(test)),
+                             y=np.append([train[len(train) - 1]], arima_predicts),
+                             name="ARIMA"))
+    fig.add_trace(go.Scatter(x = np.arange(len(train) - 1, len(train) + len(test)),
+                             y=np.append([train[len(train) - 1]], linear_regression_predicts),
+                             name="Linear regression"))
     fig.show()

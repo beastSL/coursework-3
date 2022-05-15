@@ -2,8 +2,8 @@ from typing import Dict, List, Union
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 import pandas as pd
-from models.gradient_descent import GradientDescentOptimizer
-from lib.dynamic_regression_oracle import DynamicRegressionOracle
+from gradient_descent import GradientDescentOptimizer
+from dynamic_regression_oracle import DynamicRegressionOracle
 
 
 class DynamicRegression(BaseEstimator, TransformerMixin):
