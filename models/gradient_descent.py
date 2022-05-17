@@ -6,7 +6,7 @@ from statsmodels.tsa.stattools import pacf
 
 import numpy as np
 from scipy.optimize import line_search
-from dynamic_regression_oracle import DynamicRegressionOracle
+from lib.dynamic_regression_oracle import DynamicRegressionOracle
 
 class DynamicRegressionOracleWrapper:
     def __init__(self, oracle: DynamicRegressionOracle, y: np.ndarray):

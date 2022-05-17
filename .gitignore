@@ -2,3 +2,15 @@ __pycache__/
 .DS_Store
 .vscode/**
 help.sh
+tests/application/columns.csv
+tests/application/D.csv
+tests/application/features_aggregated.csv
+tests/application/features.csv
+tests/application/H.csv
+tests/application/M.csv
+tests/application/Q.csv
+tests/application/apply_models.py
+tests/application/help.ipynb
+tests/application/series_feature_calcer.py
+tests/application/W.csv
+tests/application/Y.csv
