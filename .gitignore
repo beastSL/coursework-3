@@ -2,10 +2,7 @@ __pycache__/
 .DS_Store
 .vscode/**
 help.sh
-tests/application/columns.csv
 tests/application/D.csv
-tests/application/features_aggregated.csv
-tests/application/features.csv
 tests/application/H.csv
 tests/application/M.csv
 tests/application/Q.csv
