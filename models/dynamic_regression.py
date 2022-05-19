@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 import pandas as pd
@@ -52,7 +52,7 @@ class DynamicRegression(BaseEstimator, TransformerMixin):
                                                   max_iter,
                                                   tolerance,)
 
-    def fit(self, y: Union[List[float], np.ndarray, pd.Series], trace: bool=False, lr_finder: str='Formula', display=False, starting_params: str='random') -> tuple[str, Dict]:
+    def fit(self, y: Union[List[float], np.ndarray, pd.Series], trace: bool=False, lr_finder: str='Formula', display=False, starting_params: str='random') -> Tuple[str, Dict]:
         """
         Fit weights of Dynamic Regression.
 

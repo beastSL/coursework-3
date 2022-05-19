@@ -8,9 +8,12 @@ from sklearn.metrics import mean_squared_error
 import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings("ignore")
+from pathlib import Path
+import os
 
 if __name__ == '__main__':
-    dataset = pd.read_csv("/Users/beast-sl/source/repos/coursework-3/Dataset/Train/Monthly-train.csv")
+    dataset_path = Path(os.getcwd()) / 'Dataset' / 'Train'
+    dataset = pd.read_csv(dataset_path / "Monthly-train.csv")
     testing_series = dataset[dataset["V1"] == "M100"].squeeze().dropna().drop(index='V1')
     testing_series.index = range(len(testing_series))
     testing_series = testing_series.astype(np.float).to_numpy()
@@ -34,26 +37,26 @@ if __name__ == '__main__':
 
     print("Testing ETS")
     model = SktimeETS(auto=True, n_jobs=-1)
-    model.fit(pd.Series(train, index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq='M', periods=len(train)))))
+    model.fit(train)
     ets_predicts = model.predict(fh=np.arange(1, 6))
     print(f"MSE: {mean_squared_error(ets_predicts, test)}")
 
     print("Testing ARIMA")
     model = SktimeARIMA(suppress_warnings=True)
-    model.fit(pd.Series(train, index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq='M', periods=len(train)))))
+    model.fit(train)
     arima_predicts = model.predict(fh=np.arange(1, 6))
     print(f"MSE: {mean_squared_error(arima_predicts, test)}")
 
     print("Testing Prophet")
     model = SktimeProphet()
     model.fit(pd.Series(train, index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq='M', periods=len(train)))))
-    prophet_predicts = model.predict(fh=np.arange(1, 6)).to_numpy()
+    prophet_predicts = model.predict(fh=np.arange(1, 6))
     print(f"MSE: {mean_squared_error(prophet_predicts, test)}")
 
     print("Testing Naive")
     model = SktimeNaive()
-    model.fit(pd.Series(train, index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq='M', periods=len(train)))))
-    naive_predicts = model.predict(fh=np.arange(1, 6)).to_numpy()
+    model.fit(train)
+    naive_predicts = model.predict(fh=np.arange(1, 6))
     print(f"MSE: {mean_squared_error(naive_predicts, test)}")
 
     fig = go.Figure()

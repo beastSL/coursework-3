@@ -80,10 +80,18 @@ def cross_val(params, data, cv_window_cnt=5):
         model = params['model']
         column = params['column']
         periodicity = column[0]
+        if periodicity == 'M':
+            freq = '30D'
+        elif periodicity == 'Y':
+            freq = '365D'
+        elif periodicity == 'Q':
+            freq = '91D'
+        else:
+            freq = periodicity
         series = data[data["V1"] == column].squeeze().dropna().drop(index='V1')
         series = pd.Series(
             series.values,
-            index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq=periodicity, periods=len(series))),
+            index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq=freq, periods=len(series))),
             dtype=np.float64
         )
         fh = params['fh']
@@ -213,7 +221,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if not args.max_ar_depth or not args.max_seas_depth or not args.cv_windows:
         raise TypeError()
-    m4_path = Path('/Users/beast-sl/source/repos/coursework-3/Dataset')
+    m4_path = Path((Path(os.getcwd()) / 'Dataset'))
     dataset_path = m4_path / 'Train'
     info_path = m4_path / 'M4-info.csv'
 

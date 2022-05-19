@@ -1,5 +1,5 @@
 from functools import partial, partialmethod
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 import time
 from statsmodels.tsa.stattools import pacf
@@ -151,7 +151,7 @@ class GradientDescentOptimizer:
         self.tolerance = tolerance
         self.intercept_weight = int(fit_intercept)
 
-    def optimize(self, y: List[float], trace: bool=False, lr_finder: str='Wolfe', display=False, starting_params: str='random') -> tuple[List[float], Union[Dict, None], str]:
+    def optimize(self, y: List[float], trace: bool=False, lr_finder: str='Wolfe', display=False, starting_params: str='random') -> Tuple[List[float], Union[Dict, None], str]:
         """
         Optimize weights of Dynamic Regression.
 
