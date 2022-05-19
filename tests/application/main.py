@@ -20,6 +20,7 @@ with warnings.catch_warnings():
     from models.models import SktimeARIMA, SktimeETS, SktimeProphet, SktimeNaive
     from models.dynamic_regression import DynamicRegression
     from sktime.forecasting.model_evaluation import evaluate
+    from sklearn.metrics import mean_absolute_error
 
 
 FH = {
@@ -80,7 +81,11 @@ def cross_val(params, data, cv_window_cnt=5):
         column = params['column']
         periodicity = column[0]
         series = data[data["V1"] == column].squeeze().dropna().drop(index='V1')
-        series = pd.Series(series, index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq=periodicity, periods=len(series))))
+        series = pd.Series(
+            series.values,
+            index=pd.DatetimeIndex(pd.date_range(end='2022-05-01 00:00', freq=periodicity, periods=len(series))),
+            dtype=np.float64
+        )
         fh = params['fh']
         sp = FH[periodicity]
         if fh == 'one-step':
@@ -90,7 +95,7 @@ def cross_val(params, data, cv_window_cnt=5):
         else:
             fh = np.arange(1, sp + 1)
         window_length = len(series) - cv_window_cnt * max(fh)
-        if model == 'ARIMA' or model == 'ETS' or model == 'PROPHET':
+        if model == 'ARIMA' or model == 'ETS' or model == 'PROPHET' or model == 'Naive':
             if window_length < cv_window_cnt * max(fh):
                 return [None, params]
         elif model.startswith('DynamicRegression'):
@@ -103,7 +108,7 @@ def cross_val(params, data, cv_window_cnt=5):
             ar_depth, seas_depth = map(int, model.split('-')[1:])
             if window_length < max(ar_depth, seas_depth * sp) + max(fh):
                 return [None, params]
-        cv = SlidingWindowSplitter(fh=fh, window_length=window_length, step_length = max(fh), start_with_window=True)
+        cv = SlidingWindowSplitter(fh=fh, window_length=window_length, step_length = int(max(fh)), start_with_window=True)
         if model == 'ARIMA':
             model = SktimeARIMA(suppress_warnings=True)
         elif model == 'ETS':
@@ -118,9 +123,26 @@ def cross_val(params, data, cv_window_cnt=5):
         else:
             ar_depth, seas_depth = map(int, model.split('-')[1:])
             model = DynamicRegression(fh=fh, sp=sp, ar_depth=ar_depth, seas_depth=seas_depth)
-        mae = np.mean(evaluate(model, cv, series, scoring=MeanAbsoluteError())['test_MeanAbsoluteError'])
+        errors = []
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            for train_inds, test_inds in cv.split(series):
+                train = series.iloc[train_inds]
+                test = series.iloc[test_inds]
+                model.fit(train)
+                if isinstance(model, DynamicRegression):
+                    predicts = model.predict(train)
+                elif isinstance(model, SktimeProphet):
+                    predicts = model.predict(fh=fh).to_numpy().squeeze()
+                else:
+                    predicts = model.predict(fh=fh).squeeze()
+                errors.append(mean_absolute_error([test], [predicts]))
+        mae = np.mean(errors)
         return [mae, params]
     except:
+        print("EXCEPTION IN APPLY MODELS")
+        print(params)
+        raise Exception
         return [None, params]
 
 
@@ -135,11 +157,15 @@ def apply_models(df, data, cv_window_cnt=5):
         cv_window_cnt=cv_window_cnt
     )
     with Pool(processes=os.cpu_count() - 1) as pool:
-        returns = list(tqdm(pool.imap_unordered(cross_val_function, grid), total=len(grid), dynamic_ncols=True))
+        progress_bar = tqdm(pool.imap_unordered(cross_val_function, grid), total=len(grid), dynamic_ncols=True)
+        progress_bar.set_description(f"Calculating periodicity {grid[0]['column'][0]}...")
+        returns = list(progress_bar)
+    progress_bar = tqdm(returns, dynamic_ncols=True, leave=False)
+    progress_bar.set_description("Writing into dataframe...")
     for mae, params in returns:
         df.loc[(params['column'], params['fh'])][params['model']] = mae
     return df
-    
+
 
 def calculate_series_features(df, info_path, stationary_threshold_pvalue=0.05, seasonal_threshold=0.2):
     info = pd.read_csv(info_path)
@@ -205,11 +231,6 @@ if __name__ == '__main__':
     # columns.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'columns.csv')
     columns = pd.read_csv(Path(os.getcwd()) / 'tests' / 'application' / 'columns.csv')['0']
 
-    indices = []
-    for column in columns.values:
-        indices.append((column, 'one-step'))
-        indices.append((column, 'long-step'))
-        indices.append((column, 'many-steps'))
     models = [
         'ARIMA',
         'ETS',
@@ -220,10 +241,14 @@ if __name__ == '__main__':
             for ar_depth in range(1, int(args.max_ar_depth) + 1) \
                 for seas_depth in range(1, int(args.max_seas_depth) + 1)]
     ]
-    models_results = pd.DataFrame(index=pd.MultiIndex.from_tuples(indices, names=['column', 'fh']), columns=models)
-    # print(models_results)
-    for periodicity in ['H', 'D', 'W', 'M', 'Q', 'Y']:
+    for periodicity in ['H', 'D', 'M', 'Q', 'Y']:
+        indices = []
+        for column in columns[columns.str.startswith(periodicity)]:
+            indices.append((column, 'one-step'))
+            indices.append((column, 'long-step'))
+            indices.append((column, 'many-steps'))
+        models_results = pd.DataFrame(index=pd.MultiIndex.from_tuples(indices, names=['column', 'fh']), columns=models)
         dataset = load_series(columns, dataset_path, periodicity)
         dataset.to_csv(Path(os.getcwd()) / 'tests' / 'application' / f"{periodicity}.csv")
-        apply_models(models_results, dataset, args.cv_windows)
-    models_results.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'models_results.csv')
+        models_results = apply_models(models_results, dataset, args.cv_windows)
+        models_results.to_csv(Path(os.getcwd()) / 'tests' / 'application' / f'{periodicity}_results.csv')

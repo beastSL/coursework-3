@@ -7,6 +7,8 @@ from statsmodels.tsa.stattools import pacf
 import numpy as np
 from scipy.optimize import line_search
 from lib.dynamic_regression_oracle import DynamicRegressionOracle
+from sklearn.exceptions import ConvergenceWarning
+import warnings
 
 class DynamicRegressionOracleWrapper:
     def __init__(self, oracle: DynamicRegressionOracle, y: np.ndarray):
@@ -242,6 +244,6 @@ class GradientDescentOptimizer:
                 history['func'].append(self.oracle.func(x_k.astype(np.float64), y.astype(np.float64)))
                 history['grad_norm'].append(current_grad_norm)
         if current_grad_norm ** 2 > self.tolerance * starting_grad_norm ** 2:
-            print("WARNING: Gradient descent did not converge")
+            warnings.warn("Gradient descent did not converge", ConvergenceWarning)
             return x_k, 'iterations_exceeded', history
         return x_k, 'success', history
