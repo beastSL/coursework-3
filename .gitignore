@@ -11,3 +11,9 @@ tests/application/help.ipynb
 tests/application/series_feature_calcer.py
 tests/application/W.csv
 tests/application/Y.csv
+tests/application/models_results.csv
+tests/application/H_results.csv
+tests/application/Y_results.csv
+tests/application/Q_results.csv
+tests/application/M_results.csv
+tests/application/D_results.csv
