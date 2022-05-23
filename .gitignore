@@ -17,3 +17,4 @@ tests/application/Y_results.csv
 tests/application/Q_results.csv
 tests/application/M_results.csv
 tests/application/D_results.csv
+tests/application/aggregated_results.csv
