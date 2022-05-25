@@ -28,10 +28,10 @@ for periodicity in ['H', 'D', 'M', 'Q', 'Y']:
     if periodicity != 'Y':
         period_results['SeasonalDynamicRegression'] = period_results[[column \
                                                     for column in period_results.columns \
-                                                        if column.startswith('Dynamic') and len(column.split('-')) == 3]].max(axis=1)
+                                                        if column.startswith('Dynamic') and len(column.split('-')) == 3]].min(axis=1)
     period_results['DynamicRegression'] = period_results[[column \
                                                 for column in period_results.columns \
-                                                    if column.startswith('Dynamic') and len(column.split('-')) == 2]].max(axis=1)
+                                                    if column.startswith('Dynamic') and len(column.split('-')) == 2]].min(axis=1)
     period_results = period_results.drop(
         [column for column in period_results.columns if column.startswith('Dynamic') and '-' in column],
         axis=1
