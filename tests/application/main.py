@@ -150,7 +150,6 @@ def cross_val(params, data, cv_window_cnt=5):
     except:
         print("EXCEPTION IN APPLY MODELS")
         print(params)
-        raise Exception
         return [None, params]
 
 
@@ -225,18 +224,18 @@ if __name__ == '__main__':
     dataset_path = m4_path / 'Train'
     info_path = m4_path / 'M4-info.csv'
 
-    # full_columns = choose_subset(info_path, 1).sort_values()
-    # features = pd.DataFrame(index=full_columns, columns=['periodicity', 'category', 'is_seasonal', 'is_stationary'])
-    # features = calculate_series_features(features, info_path)
-    # features.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'features.csv')
-    # features['count'] = 1
-    # features_aggregated = features.groupby(by=['periodicity', 'category', 'is_seasonal', 'is_stationary']).sum()
-    # features_aggregated.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'features_aggregated.csv')
+    full_columns = choose_subset(info_path, 1).sort_values()
+    features = pd.DataFrame(index=full_columns, columns=['periodicity', 'category', 'is_seasonal', 'is_stationary'])
+    features = calculate_series_features(features, info_path)
+    features.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'features.csv')
+    features['count'] = 1
+    features_aggregated = features.groupby(by=['periodicity', 'category', 'is_seasonal', 'is_stationary']).sum()
+    features_aggregated.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'features_aggregated.csv')
     features = pd.read_csv((Path(os.getcwd()) / 'tests' / 'application' / 'features.csv'))
     features_aggregated = pd.read_csv((Path(os.getcwd()) / 'tests' / 'application' / 'features_aggregated.csv'))
 
-    # columns = pd.Series(choose_subset_from_features(features, features_aggregated)).sort_values().reset_index(drop=True)
-    # columns.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'columns.csv')
+    columns = pd.Series(choose_subset_from_features(features, features_aggregated)).sort_values().reset_index(drop=True)
+    columns.to_csv(Path(os.getcwd()) / 'tests' / 'application' / 'columns.csv')
     columns = pd.read_csv(Path(os.getcwd()) / 'tests' / 'application' / 'columns.csv')['0']
 
     models = [
