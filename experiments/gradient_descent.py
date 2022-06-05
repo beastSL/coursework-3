@@ -1,5 +1,5 @@
 from functools import partial, partialmethod
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 import time
 from statsmodels.tsa.stattools import pacf
@@ -7,6 +7,8 @@ from statsmodels.tsa.stattools import pacf
 import numpy as np
 from scipy.optimize import line_search
 from dynamic_regression_oracle import DynamicRegressionOracle
+from sklearn.exceptions import ConvergenceWarning
+import warnings
 
 class DynamicRegressionOracleWrapper:
     def __init__(self, oracle: DynamicRegressionOracle, y: np.ndarray):
@@ -149,7 +151,7 @@ class GradientDescentOptimizer:
         self.tolerance = tolerance
         self.intercept_weight = int(fit_intercept)
 
-    def optimize(self, y: List[float], trace: bool=False, lr_finder: str='Wolfe', display=False, starting_params: str='random') -> tuple[List[float], Union[Dict, None], str]:
+    def optimize(self, y: List[float], trace: bool=False, lr_finder: str='Wolfe', display=False, starting_params: str='random') -> Tuple[List[float], Union[Dict, None], str]:
         """
         Optimize weights of Dynamic Regression.
 
@@ -242,6 +244,6 @@ class GradientDescentOptimizer:
                 history['func'].append(self.oracle.func(x_k.astype(np.float64), y.astype(np.float64)))
                 history['grad_norm'].append(current_grad_norm)
         if current_grad_norm ** 2 > self.tolerance * starting_grad_norm ** 2:
-            print("WARNING: Gradient descent did not converge")
+            warnings.warn("Gradient descent did not converge", ConvergenceWarning)
             return x_k, 'iterations_exceeded', history
         return x_k, 'success', history
