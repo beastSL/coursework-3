@@ -7,7 +7,7 @@ def test_predict():
     """
     # basic
     y_train = np.array([1, 0, 1, 0, 1, 0, 1])
-    model = DynamicRegression(fh=np.arange(1, 6))
+    model = DynamicRegression(ar_depth=5, fh=np.arange(1, 6))
     model.params = np.array([0, 0.2, 0.2, 0.2, 0.2, 0.2])
     y_test = np.array([0.6, 0.52, 0.624, 0.5488, 0.65856])
     y_preds = model.predict(y_train)
@@ -16,7 +16,7 @@ def test_predict():
 
     # trend
     y_train = np.array([1, 2, 3, 4, 5, 6, 7, 8])
-    model = DynamicRegression(fh=np.arange(1, 6))
+    model = DynamicRegression(ar_depth=5, fh=np.arange(1, 6))
     model.params = np.array([1, 1, 0, 0, 0, 0])
     y_test = np.array([9, 10, 11, 12, 13])
     y_preds = model.predict(y_train)
@@ -25,7 +25,7 @@ def test_predict():
 
     # fh=[5]
     y_train = np.array([1, 0, 1, 0, 1, 0, 1])
-    model = DynamicRegression(fh=[5])
+    model = DynamicRegression(ar_depth=5, fh=[5])
     model.params = np.array([0, 0.2, 0.2, 0.2, 0.2, 0.2])
     y_test = np.array([0.65856])
     y_preds = model.predict(y_train)
@@ -45,7 +45,7 @@ def test_predict():
 def test_grad():
     # grad for one object
     y_train = np.array([1, 0, 1, 0, 1, 0, 1])
-    model = DynamicRegression(fh=np.arange(1, 6))
+    model = DynamicRegression(ar_depth=5, fh=np.arange(1, 6))
     model.params = np.array([1, -1, 0, 0, 0, 0])
     y_test = np.array([0, 0, 0, 0, 0])
     grad = model.oracle.calc_grad_for_one_object(model.params.astype(np.float64), y_train.astype(np.float64), y_test.astype(np.float64))
@@ -55,7 +55,7 @@ def test_grad():
     
     # grad = zero
     y_train = np.array([1, 0, 1, 0, 1, 0, 1])
-    model = DynamicRegression(fh=np.arange(1, 6))
+    model = DynamicRegression(ar_depth=5, fh=np.arange(1, 6))
     model.params = np.array([1, -1, 0, 0, 0, 0])
     y_test = np.array([0, 1, 0, 1, 0])
     grad = model.oracle.calc_grad_for_one_object(model.params.astype(np.float64), y_train.astype(np.float64), y_test.astype(np.float64))
@@ -65,7 +65,7 @@ def test_grad():
     
     # learning_steps != 'all'
     y_train = np.array([1, 0, 1, 0, 1, 0, 1])
-    model = DynamicRegression(fh=np.arange(1, 6), learning_steps=[0, 2, 4])
+    model = DynamicRegression(ar_depth=5, fh=np.arange(1, 6), learning_steps=[1, 3, 5])
     model.params = np.array([1, -1, 0, 0, 0, 0])
     y_test = np.array([0, 0, 0, 0, 0])
     grad = model.oracle.calc_grad_for_one_object(model.params.astype(np.float64), y_train.astype(np.float64), y_test.astype(np.float64))

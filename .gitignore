@@ -18,3 +18,9 @@ tests/application/Q_results.csv
 tests/application/M_results.csv
 tests/application/D_results.csv
 tests/application/aggregated_results.csv
+report/coursework.aux
+report/coursework.fdb_latexmk
+report/coursework.fls
+report/coursework.log
+report/coursework.synctex.gz
+report/coursework.toc
